@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3www
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3www
+  template:
+    metadata:
+      labels:
+        app: s3www
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - name: s3www
+          image: {{ .Values.s3www.image }}
+          args:
+            - -endpoint=http://minio:9000
+            - -accessKey=$(S3_ACCESS_KEY)
+            - -secretKey=$(S3_SECRET_KEY)
+            - -bucket={{ .Values.minio.bucketName }}
+            - -address=0.0.0.0:8080
+          env:
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.credentialsSecret }}
+                  key: accesskey
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.credentialsSecret }}
+                  key: secretkey
+          ports:
+            - containerPort: {{ .Values.s3www.port }}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
