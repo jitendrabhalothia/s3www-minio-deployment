@@ -1,0 +1,39 @@
+# Terraform state
+terraform.tfstate
+terraform.tfstate.*
+*.tfstate
+*.tfstate.backup
+.crash
+.terraform/
+.terraform.lock.hcl
+
+# Helm
+charts/**/charts/
+charts/**/tmpcharts/
+charts/**/values.yaml~
+charts/**/.helmignore
+charts/**/Chart.lock
+
+# Kubernetes Secrets & Configs
+*.env
+*.secret.yaml
+*.secrets.yaml
+secrets/
+*.crt
+*.key
+
+# Logs
+*.log
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.bak
+*~
+
+# NodePort/Ingress test outputs
+kubectl-output.txt
+

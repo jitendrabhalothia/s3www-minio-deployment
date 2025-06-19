@@ -1,0 +1,4 @@
+apiVersion: v2
+name: s3www
+description: Helm chart for s3www and MinIO
+version: 0.1.0

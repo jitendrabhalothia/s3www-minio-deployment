@@ -1,0 +1,17 @@
+s3www:
+  image: y4m4/s3www:latest
+  port: 8080
+
+minio:
+  credentialsSecret: minio-creds
+  bucketName: mybuc
+  fileName: index.html
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPU: 70
+
+service:
+  type: NodePort

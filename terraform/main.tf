@@ -22,21 +22,21 @@ provider "helm" {
 }
 
 resource "helm_release" "s3www" {
-  name       = "s3www"
-  chart      = "../charts/s3www"
-  namespace  = "default"
-  values     = [file("../charts/s3www/values.yaml")]
+  name      = "s3www"
+  chart     = "../charts/s3www"
+  namespace = "default"
+  values    = [file("../charts/s3www/values.yaml")]
 
   depends_on = [helm_release.sealed_secrets]
 }
 
 resource "helm_release" "sealed_secrets" {
-  name       = "sealed-secrets"
-  namespace  = "kube-system"
+  name      = "sealed-secrets"
+  namespace = "kube-system"
 
   repository = "https://bitnami-labs.github.io/sealed-secrets"
   chart      = "sealed-secrets"
-  version    = "2.15.3"  # Latest stable version as of June 2025
+  version    = "2.15.3" # Latest stable version as of June 2025
 
   create_namespace = false
 
