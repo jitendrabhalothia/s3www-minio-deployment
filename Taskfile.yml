@@ -1,0 +1,65 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  fmt:
+    desc: Format Terraform code
+    dir: terraform
+    cmds:
+      - terraform fmt -recursive
+
+  validate:
+    desc: Validate Terraform configuration
+    dir: terraform
+    cmds:
+      - terraform validate
+
+  lint-helm:
+    desc: Lint Helm chart
+    cmds:
+      - helm lint charts/s3www
+
+  install-sealed-secrets:
+    desc: Install Sealed Secrets controller (only if not already installed)
+    cmds:
+      - |
+        if ! helm list -n kube-system | grep sealed-secrets; then
+          echo "🔧 Installing Sealed Secrets..."
+          helm repo add bitnami-labs https://bitnami-labs.github.io/sealed-secrets
+          helm repo update
+          helm install sealed-secrets bitnami-labs/sealed-secrets --namespace kube-system
+        else
+          echo "✅ Sealed Secrets already installed. Skipping."
+        fi
+
+  apply-sealed-secret:
+    desc: Apply encrypted credentials for MinIO
+    cmds:
+      - kubectl apply -f charts/s3www/files/minio-sealed-secret.yaml
+
+  deploy:
+    desc: Deploy using Terraform and Helm
+    dir: terraform
+    cmds:
+      - terraform init
+      - terraform apply -auto-approve
+
+  status:
+    desc: Show Kubernetes services and pods
+    cmds:
+      - kubectl get pods
+      - kubectl get svc
+
+  destroy:
+    desc: Destroy infrastructure
+    dir: terraform
+    cmds:
+      - terraform destroy -auto-approve
+
+  setup:
+    desc: Full deployment pipeline
+    deps: [fmt, validate, lint-helm, install-sealed-secrets, apply-sealed-secret, deploy, status]
