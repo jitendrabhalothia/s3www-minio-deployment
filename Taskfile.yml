@@ -36,6 +36,18 @@ tasks:
           echo "✅ Sealed Secrets already installed. Skipping."
         fi
 
+  import-sealed-secrets:
+    desc: Import existing Sealed Secrets release into Terraform
+    dir: terraform
+    cmds:
+      - |
+        if ! terraform state list | grep 'helm_release.sealed_secrets' > /dev/null; then
+          echo "📦 Importing sealed-secrets Helm release into Terraform..."
+          terraform import helm_release.sealed_secrets kube-system/sealed-secrets
+        else
+          echo "✅ sealed-secrets already managed by Terraform."
+        fi
+
   apply-sealed-secret:
     desc: Apply encrypted credentials for MinIO
     cmds:
@@ -62,4 +74,4 @@ tasks:
 
   setup:
     desc: Full deployment pipeline
-    deps: [fmt, validate, lint-helm, install-sealed-secrets, apply-sealed-secret, deploy, status]
+    deps: [fmt, validate, lint-helm, install-sealed-secrets, import-sealed-secrets, apply-sealed-secret, deploy, status]

@@ -1,5 +1,3 @@
-# UP42 Challenge
-
 # 🚀 UP42 Senior Cloud Engineer Challenge – s3www & MinIO Deployment
 
 This project demonstrates a production-grade deployment of the `s3www` application using **Helm**, **Terraform**, **MinIO**, and **Kubernetes**.
@@ -44,6 +42,32 @@ It includes:
 * Terraform (`>=1.0`)
 * Helm (`>=3`)
 * Task runner: [Install Task](https://taskfile.dev/#/installation)
+* **kubeseal CLI**: Install from [sealed-secrets GitHub releases](https://github.com/bitnami-labs/sealed-secrets)
+
+### 🔐 Creating Sealed Secrets (Optional if you need to regenerate)
+
+1. Create an unsealed Kubernetes Secret:
+
+```bash
+kubectl create secret generic minio-creds \
+  --from-literal=accesskey=minioadmin \
+  --from-literal=secretkey=minioadmin \
+  --namespace=default \
+  --dry-run=client \
+  -o yaml > minio-secret.yaml
+```
+
+2. Seal the secret using `kubeseal`:
+
+```bash
+kubeseal --controller-namespace kube-system --format yaml < minio-secret.yaml > charts/s3www/files/minio-sealed-secret.yaml
+```
+
+3. Apply to your cluster:
+
+```bash
+kubectl apply -f charts/s3www/files/minio-sealed-secret.yaml
+```
 
 ---
 
@@ -101,6 +125,8 @@ hpa:
 service:
   type: NodePort
 ```
+
+**Note:** Docker Desktop's Kubernetes does **not** natively support `LoadBalancer`-type services because it lacks integration with a cloud load balancer. Therefore, this deployment uses `NodePort` instead, allowing access via `localhost:<port>`.
 
 ---
 
@@ -171,11 +197,10 @@ task destroy
 
 ## 👤 Author
 
-**Jitendra Bhalothia**
+**Jitendra Singh**
 This project was completed as part of the UP42 Senior Cloud Engineer Challenge.
 
 * 🔗 GitHub Repo: [github.com/jitendrabhalothia/s3www-minio-deployment](https://github.com/jitendrabhalothia/s3www-minio-deployment)
-* 👤 GitHub Profile: [github.com/jitendrabhalothia](https://github.com/jitendrabhalothia)
 
 ---
 
