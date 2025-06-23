@@ -1,32 +1,34 @@
+
 ---
 
+````markdown
 # 🚀 UP42 Senior Cloud Engineer Challenge – s3www & MinIO Deployment
 
 This project demonstrates a production-grade deployment of the `s3www` application using **Helm**, **Terraform**, **MinIO**, and **Kubernetes**.
 
 ### ✅ Key Features
 
-* Infrastructure-as-Code with Terraform
-* Helm charts for `s3www` and MinIO
-* Sealed secrets for secure credential management
-* Horizontal Pod Autoscaling (HPA)
-* Prometheus metrics scraping support
-* Task automation via `Taskfile.yml`
+- Infrastructure-as-Code with Terraform  
+- Helm charts for `s3www` and MinIO  
+- Sealed secrets for secure credential management  
+- Horizontal Pod Autoscaling (HPA)  
+- Prometheus metrics scraping support  
+- Task automation via `Taskfile.yml`
 
 ---
 
 ## 📦 Application Overview
 
-* **s3www**: A Go-based static file server for S3-compatible storage
-* **MinIO**: Lightweight, high-performance S3-compatible object storage
-* **index.html**: Static HTML page served via `s3www` from MinIO
+- **s3www**: A Go-based static file server for S3-compatible storage  
+- **MinIO**: Lightweight, high-performance S3-compatible object storage  
+- **index.html**: Static HTML page served via `s3www` from MinIO
 
 ---
 
 ## ⚖️ Technologies Used
 
 | Tool                   | Purpose                          |
-| ---------------------- | -------------------------------- |
+|------------------------|----------------------------------|
 | Terraform              | Infrastructure orchestration     |
 | Helm                   | Kubernetes deployment templating |
 | MinIO                  | Local S3-compatible backend      |
@@ -38,11 +40,11 @@ This project demonstrates a production-grade deployment of the `s3www` applicati
 
 ## ✅ Prerequisites
 
-* Docker Desktop with Kubernetes enabled (or Minikube)
-* Terraform `>= 1.0`
-* Helm `>= 3`
-* [Task](https://taskfile.dev/#/installation) CLI
-* [kubeseal CLI](https://github.com/bitnami-labs/sealed-secrets)
+- Docker Desktop with Kubernetes enabled (or Minikube)  
+- Terraform `>= 1.0`  
+- Helm `>= 3`  
+- [Task](https://taskfile.dev/#/installation) CLI  
+- [kubeseal CLI](https://github.com/bitnami-labs/sealed-secrets)
 
 ---
 
@@ -53,7 +55,7 @@ Secrets are modularized and managed via a dedicated Taskfile.
 ### 🔁 Taskfiles Overview
 
 | Taskfile               | Description                    |
-| ---------------------- | ------------------------------ |
+|------------------------|--------------------------------|
 | `Taskfile.yml`         | Infra setup (Terraform + Helm) |
 | `Taskfile.secrets.yml` | Secrets generation and cleanup |
 
@@ -64,11 +66,11 @@ Set secrets locally:
 ```bash
 export MINIO_ACCESS_KEY=minioadmin
 export MINIO_SECRET_KEY=minioadmin
-```
+````
 
 They’re securely used in your Taskfile setup:
 
-```yaml
+```bash
 kubectl create secret generic minio-creds \
   --from-literal=accesskey=${MINIO_ACCESS_KEY} \
   --from-literal=secretkey=${MINIO_SECRET_KEY}
@@ -214,5 +216,3 @@ You should see:
 ## 📜 License
 
 Licensed under the Apache 2.0 License.
-
----
