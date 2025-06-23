@@ -1,3 +1,5 @@
+---
+
 # 🚀 UP42 Senior Cloud Engineer Challenge – s3www & MinIO Deployment
 
 This project demonstrates a production-grade deployment of the `s3www` application using **Helm**, **Terraform**, **MinIO**, and **Kubernetes**.
@@ -34,77 +36,98 @@ It includes:
 
 ---
 
-## 🚀 Deployment Steps
-
-### ✅ Prerequisites
+## ✅ Prerequisites
 
 * Docker Desktop with Kubernetes enabled (or Minikube)
 * Terraform (`>=1.0`)
 * Helm (`>=3`)
 * Task runner: [Install Task](https://taskfile.dev/#/installation)
-* **kubeseal CLI**: Install from [sealed-secrets GitHub releases](https://github.com/bitnami-labs/sealed-secrets)
+* **kubeseal CLI**: [Install here](https://github.com/bitnami-labs/sealed-secrets)
 
-### 🔐 Creating Sealed Secrets (Optional if you need to regenerate)
+---
 
-1. Create an unsealed Kubernetes Secret:
+## 🆕 Multi-Taskfile Support & Secure Secrets
+
+To keep things modular and secure, secrets are now managed in a dedicated Taskfile.
+
+### 🔁 Taskfiles
+
+| Taskfile               | Description                        |
+| ---------------------- | ---------------------------------- |
+| `Taskfile.yml`         | Terraform + Helm-based setup tasks |
+| `Taskfile.secrets.yml` | Sealed Secrets generation/cleanup  |
+
+---
+
+### 🔐 Secure MinIO Credentials via Environment Variables
+
+Set your secrets once locally:
 
 ```bash
+export MINIO_ACCESS_KEY=minioadmin
+export MINIO_SECRET_KEY=minioadmin
+```
+
+These will be used securely in Taskfile:
+
+```yaml
 kubectl create secret generic minio-creds \
-  --from-literal=accesskey=minioadmin \
-  --from-literal=secretkey=minioadmin \
-  --namespace=default \
-  --dry-run=client \
-  -o yaml > minio-secret.yaml
-```
-
-2. Seal the secret using `kubeseal`:
-
-```bash
-kubeseal --controller-namespace kube-system --format yaml < minio-secret.yaml > charts/s3www/files/minio-sealed-secret.yaml
-```
-
-3. Apply to your cluster:
-
-```bash
-kubectl apply -f charts/s3www/files/minio-sealed-secret.yaml
+  --from-literal=accesskey=${MINIO_ACCESS_KEY} \
+  --from-literal=secretkey=${MINIO_SECRET_KEY}
 ```
 
 ---
 
-### 🧑‍💻 Quickstart (Automated)
+## ⚙️ Deployment Options
 
-Run the full deployment pipeline with one command:
+### 🚀 Full Setup (Infra + Sealed Secrets)
 
 ```bash
+# 1. Generate and apply sealed secrets
+task -t Taskfile.secrets.yml setup-secrets
+
+# 2. Deploy Helm + Terraform stack
 task setup
 ```
 
-This will:
-
-1. Format and validate Terraform
-2. Lint the Helm chart
-3. Install the Sealed Secrets controller
-4. Apply your sealed credentials for MinIO
-5. Deploy `s3www` + MinIO
-6. Show the status of deployed resources
-
 ---
 
-## 🔑 Sealed Secrets
+### 🔁 Recreate Setup (in Minutes)
 
-The MinIO credentials are encrypted using `kubeseal` and committed as a SealedSecret in:
-
-```yaml
-charts/s3www/files/minio-sealed-secret.yaml
+```bash
+task -t Taskfile.secrets.yml destroy-secrets
+task destroy
+task -t Taskfile.secrets.yml setup-secrets
+task setup
 ```
 
-You may regenerate this using your cluster’s public certificate if needed.
+---
+
+### 🧹 Cleanup (Tear Down Everything)
+
+```bash
+# Infra + secrets
+task destroy
+task -t Taskfile.secrets.yml destroy-secrets
+```
 
 ---
 
+### 🚀 Developer Onboarding – Quick Start
+
+```bash
+git clone https://github.com/jitendrabhalothia/s3www-minio-deployment.git
+cd s3www-minio-deployment
+
+export MINIO_ACCESS_KEY=minioadmin
+export MINIO_SECRET_KEY=minioadmin
+
+task -t Taskfile.secrets.yml setup-secrets
+task setup
+```
 ## ⚙️ Configuration Options
 
-All configurable values live in `charts/s3www/values.yaml`:
+All Helm values live in `charts/s3www/values.yaml`:
 
 ```yaml
 s3www:
@@ -126,25 +149,25 @@ service:
   type: NodePort
 ```
 
-**Note:** Docker Desktop's Kubernetes does **not** natively support `LoadBalancer`-type services because it lacks integration with a cloud load balancer. Therefore, this deployment uses `NodePort` instead, allowing access via `localhost:<port>`.
+**Note:** `NodePort` is used for local testing (since Docker Desktop lacks `LoadBalancer` support).
 
 ---
 
 ## 🧪 Testing
 
-After successful deployment, get the port with:
+1. Check service port:
 
 ```bash
 kubectl get svc s3www
 ```
 
-Then open in your browser:
+2. Open in browser:
 
 ```bash
-http://localhost:<nodePort>
+http://localhost:<NodePort>
 ```
 
-You should see a page that reads:
+You should see:
 
 > ✅ Task Completed
 > My name is Jitendra, and I have successfully completed the UP42 Senior Cloud Engineer Challenge.
@@ -153,43 +176,34 @@ You should see a page that reads:
 
 ---
 
-## 🧺 Cleanup
-
-To destroy all resources:
-
-```bash
-task destroy
-```
-
----
-
 ## 📂 Project Structure
 
 ```
 .
-├── CHALLENGE.md                # Thought process and decisions
-├── README.md                   # This documentation
+├── CHALLENGE.md
+├── README.md
 ├── charts/
 │   └── s3www/
 │       ├── Chart.yaml
 │       ├── values.yaml
 │       ├── files/
-│       │   └── index.html
+│       │   ├── index.html
 │       │   └── minio-sealed-secret.yaml
 │       └── templates/
+│           ├── configmap.yaml
 │           ├── s3www-deployment.yaml
 │           ├── s3www-service.yaml
 │           ├── s3www-hpa.yaml
 │           ├── minio-deployment.yaml
 │           ├── minio-service.yaml
 │           ├── minio-secret.yaml
-│           ├── configmap.yaml
 │           └── upload-job.yaml
 ├── terraform/
 │   ├── main.tf
 │   ├── outputs.tf
 │   └── variables.tf
-├── Taskfile.yml                # Task automation
+├── Taskfile.yml
+├── Taskfile.secrets.yml
 └── .gitignore
 ```
 
@@ -198,12 +212,14 @@ task destroy
 ## 👤 Author
 
 **Jitendra Singh**
-This project was completed as part of the UP42 Senior Cloud Engineer Challenge.
+🚀 UP42 Senior Cloud Engineer Challenge
 
-* 🔗 GitHub Repo: [github.com/jitendrabhalothia/s3www-minio-deployment](https://github.com/jitendrabhalothia/s3www-minio-deployment)
+* 🔗 GitHub: [jitendrabhalothia/s3www-minio-deployment](https://github.com/jitendrabhalothia/s3www-minio-deployment)
 
 ---
 
 ## 📜 License
 
 Licensed under the Apache 2.0 License.
+
+---
