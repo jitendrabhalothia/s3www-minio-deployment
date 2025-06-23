@@ -4,22 +4,22 @@
 
 This project demonstrates a production-grade deployment of the `s3www` application using **Helm**, **Terraform**, **MinIO**, and **Kubernetes**.
 
-It includes:
+### ✅ Key Features
 
-* ✅ Infrastructure-as-Code using Terraform
-* ✅ Helm charts for `s3www` and MinIO
-* ✅ Sealed secrets for secure credential management
-* ✅ Horizontal Pod Autoscaling (HPA)
-* ✅ Support for Prometheus metrics scraping
-* ✅ Task automation using `Taskfile.yml`
+* Infrastructure-as-Code with Terraform
+* Helm charts for `s3www` and MinIO
+* Sealed secrets for secure credential management
+* Horizontal Pod Autoscaling (HPA)
+* Prometheus metrics scraping support
+* Task automation via `Taskfile.yml`
 
 ---
 
 ## 📦 Application Overview
 
-* **s3www**: A Go-based static file server for S3-compatible storage.
-* **MinIO**: Lightweight, high-performance S3-compatible object storage.
-* **index.html**: A static HTML file served via s3www from MinIO.
+* **s3www**: A Go-based static file server for S3-compatible storage
+* **MinIO**: Lightweight, high-performance S3-compatible object storage
+* **index.html**: Static HTML page served via `s3www` from MinIO
 
 ---
 
@@ -39,36 +39,34 @@ It includes:
 ## ✅ Prerequisites
 
 * Docker Desktop with Kubernetes enabled (or Minikube)
-* Terraform (`>=1.0`)
-* Helm (`>=3`)
-* Task runner: [Install Task](https://taskfile.dev/#/installation)
-* **kubeseal CLI**: [Install here](https://github.com/bitnami-labs/sealed-secrets)
+* Terraform `>= 1.0`
+* Helm `>= 3`
+* [Task](https://taskfile.dev/#/installation) CLI
+* [kubeseal CLI](https://github.com/bitnami-labs/sealed-secrets)
 
 ---
 
 ## 🆕 Multi-Taskfile Support & Secure Secrets
 
-To keep things modular and secure, secrets are now managed in a dedicated Taskfile.
+Secrets are modularized and managed via a dedicated Taskfile.
 
-### 🔁 Taskfiles
+### 🔁 Taskfiles Overview
 
-| Taskfile               | Description                        |
-| ---------------------- | ---------------------------------- |
-| `Taskfile.yml`         | Terraform + Helm-based setup tasks |
-| `Taskfile.secrets.yml` | Sealed Secrets generation/cleanup  |
+| Taskfile               | Description                    |
+| ---------------------- | ------------------------------ |
+| `Taskfile.yml`         | Infra setup (Terraform + Helm) |
+| `Taskfile.secrets.yml` | Secrets generation and cleanup |
 
----
+### 🔐 Secure MinIO Credentials
 
-### 🔐 Secure MinIO Credentials via Environment Variables
-
-Set your secrets once locally:
+Set secrets locally:
 
 ```bash
 export MINIO_ACCESS_KEY=minioadmin
 export MINIO_SECRET_KEY=minioadmin
 ```
 
-These will be used securely in Taskfile:
+They’re securely used in your Taskfile setup:
 
 ```yaml
 kubectl create secret generic minio-creds \
@@ -83,16 +81,11 @@ kubectl create secret generic minio-creds \
 ### 🚀 Full Setup (Infra + Sealed Secrets)
 
 ```bash
-# 1. Generate and apply sealed secrets
 task -t Taskfile.secrets.yml setup-secrets
-
-# 2. Deploy Helm + Terraform stack
 task setup
 ```
 
----
-
-### 🔁 Recreate Setup (in Minutes)
+### 🔁 Recreate Entire Setup
 
 ```bash
 task -t Taskfile.secrets.yml destroy-secrets
@@ -101,19 +94,16 @@ task -t Taskfile.secrets.yml setup-secrets
 task setup
 ```
 
----
-
-### 🧹 Cleanup (Tear Down Everything)
+### 🧹 Cleanup
 
 ```bash
-# Infra + secrets
 task destroy
 task -t Taskfile.secrets.yml destroy-secrets
 ```
 
 ---
 
-### 🚀 Developer Onboarding – Quick Start
+## ⚡ Developer Quick Start
 
 ```bash
 git clone https://github.com/jitendrabhalothia/s3www-minio-deployment.git
@@ -125,9 +115,12 @@ export MINIO_SECRET_KEY=minioadmin
 task -t Taskfile.secrets.yml setup-secrets
 task setup
 ```
-## ⚙️ Configuration Options
 
-All Helm values live in `charts/s3www/values.yaml`:
+---
+
+## ⚙️ Configuration
+
+Editable values are in `charts/s3www/values.yaml`:
 
 ```yaml
 s3www:
@@ -149,13 +142,13 @@ service:
   type: NodePort
 ```
 
-**Note:** `NodePort` is used for local testing (since Docker Desktop lacks `LoadBalancer` support).
+> **Note:** `NodePort` is used for local development as Docker Desktop lacks `LoadBalancer` support.
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing the Deployment
 
-1. Check service port:
+1. Check the service:
 
 ```bash
 kubectl get svc s3www
@@ -163,7 +156,7 @@ kubectl get svc s3www
 
 2. Open in browser:
 
-```bash
+```
 http://localhost:<NodePort>
 ```
 
@@ -214,7 +207,7 @@ You should see:
 **Jitendra Singh**
 🚀 UP42 Senior Cloud Engineer Challenge
 
-* 🔗 GitHub: [jitendrabhalothia/s3www-minio-deployment](https://github.com/jitendrabhalothia/s3www-minio-deployment)
+* 🔗 [GitHub Repository](https://github.com/jitendrabhalothia/s3www-minio-deployment)
 
 ---
 
