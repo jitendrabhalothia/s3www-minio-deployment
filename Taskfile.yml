@@ -6,72 +6,46 @@ tasks:
     cmds:
       - task --list
 
-  fmt:
-    desc: Format Terraform code
+  terraform-deploy:
+    desc: 🛠 Deploy infrastructure using Terraform
     dir: terraform
     cmds:
-      - terraform fmt -recursive
-
-  validate:
-    desc: Validate Terraform configuration
-    dir: terraform
-    cmds:
-      - terraform validate
-
-  lint-helm:
-    desc: Lint Helm chart
-    cmds:
-      - helm lint charts/s3www
-
-  install-sealed-secrets:
-    desc: Install Sealed Secrets controller (only if not already installed)
-    cmds:
-      - |
-        if ! helm list -n kube-system | grep sealed-secrets; then
-          echo "🔧 Installing Sealed Secrets..."
-          helm repo add bitnami-labs https://bitnami-labs.github.io/sealed-secrets
-          helm repo update
-          helm install sealed-secrets bitnami-labs/sealed-secrets --namespace kube-system
-        else
-          echo "✅ Sealed Secrets already installed. Skipping."
-        fi
-
-  import-sealed-secrets:
-    desc: Import existing Sealed Secrets release into Terraform
-    dir: terraform
-    cmds:
-      - |
-        if ! terraform state list | grep 'helm_release.sealed_secrets' > /dev/null; then
-          echo "📦 Importing sealed-secrets Helm release into Terraform..."
-          terraform import helm_release.sealed_secrets kube-system/sealed-secrets
-        else
-          echo "✅ sealed-secrets already managed by Terraform."
-        fi
-
-  apply-sealed-secret:
-    desc: Apply encrypted credentials for MinIO
-    cmds:
-      - kubectl apply -f charts/s3www/files/minio-sealed-secret.yaml
-
-  deploy:
-    desc: Deploy using Terraform and Helm
-    dir: terraform
-    cmds:
+      - echo "🚀 Initializing Terraform..."
       - terraform init
+      - echo "✅ Terraform initialized!"
+      - echo "📦 Applying Terraform..."
       - terraform apply -auto-approve
+      - echo "✅ Terraform apply complete!"
+
+  open-app:
+    desc: 🌐 Open s3www NodePort URL in browser
+    cmds:
+      - |
+        echo "🌐 Trying to open the s3www URL..."
+        PORT=$(kubectl get svc s3www -o=jsonpath='{.spec.ports[0].nodePort}')
+        echo "➡ http://localhost:$PORT"
+        if command -v xdg-open > /dev/null; then
+          xdg-open http://localhost:$PORT
+        elif command -v open > /dev/null; then
+          open http://localhost:$PORT
+        else
+          echo "Please open http://localhost:$PORT manually."
+        fi
 
   status:
-    desc: Show Kubernetes services and pods
+    desc: 📋 Show Kubernetes pods and services
     cmds:
       - kubectl get pods
       - kubectl get svc
 
   destroy:
-    desc: Destroy infrastructure
+    desc: 🧹 Tear down infrastructure
     dir: terraform
     cmds:
+      - echo "🧨 Destroying all resources..."
       - terraform destroy -auto-approve
+      - echo "🧼 All resources destroyed."
 
   setup:
-    desc: Full deployment pipeline
-    deps: [fmt, validate, lint-helm, install-sealed-secrets, import-sealed-secrets, apply-sealed-secret, deploy, status]
+    desc: 🔧 Full setup pipeline (Terraform + open URL)
+    deps: [terraform-deploy, status, open-app]
