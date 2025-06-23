@@ -17,12 +17,20 @@ tasks:
       - terraform apply -auto-approve
       - echo "✅ Terraform apply complete!"
 
+  terraform-destroy:
+    desc: 🧹 Destroy infrastructure with Terraform
+    dir: terraform
+    cmds:
+      - echo "🧨 Destroying all resources..."
+      - terraform destroy -auto-approve
+      - echo "🧼 All resources destroyed."
+
   open-app:
     desc: 🌐 Open s3www NodePort URL in browser
     cmds:
       - |
         echo "🌐 Trying to open the s3www URL..."
-        PORT=$(kubectl get svc s3www -o=jsonpath='{.spec.ports[0].nodePort}')
+        PORT=$(kubectl get svc s3www -n s3www-app -o=jsonpath='{.spec.ports[0].nodePort}')
         echo "➡ http://localhost:$PORT"
         if command -v xdg-open > /dev/null; then
           xdg-open http://localhost:$PORT
@@ -35,17 +43,9 @@ tasks:
   status:
     desc: 📋 Show Kubernetes pods and services
     cmds:
-      - kubectl get pods
-      - kubectl get svc
-
-  destroy:
-    desc: 🧹 Tear down infrastructure
-    dir: terraform
-    cmds:
-      - echo "🧨 Destroying all resources..."
-      - terraform destroy -auto-approve
-      - echo "🧼 All resources destroyed."
+      - kubectl get pods -n s3www-app
+      - kubectl get svc -n s3www-app
 
   setup:
-    desc: 🔧 Full setup pipeline (Terraform + open URL)
+    desc: 🔧 Full setup pipeline (Terraform + Sealed Secrets + Open URL)
     deps: [terraform-deploy, status, open-app]
