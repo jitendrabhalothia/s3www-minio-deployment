@@ -2,7 +2,6 @@
 ---
 
 ````markdown
-# 🚀 UP42 Senior Cloud Engineer Challenge – s3www & MinIO Deployment
 
 This project demonstrates a production-grade deployment of the `s3www` application using **Helm**, **Terraform**, **MinIO**, and **Kubernetes**.
 
@@ -161,14 +160,6 @@ kubectl get svc s3www
 ```
 http://localhost:<NodePort>
 ```
-
-You should see:
-
-> ✅ Task Completed
-> My name is Jitendra, and I have successfully completed the UP42 Senior Cloud Engineer Challenge.
-> [GitHub Repository](https://github.com/jitendrabhalothia/s3www-minio-deployment)
-> [GitHub Profile](https://github.com/jitendrabhalothia)
-
 ---
 
 ## 📂 Project Structure
@@ -207,8 +198,6 @@ You should see:
 ## 👤 Author
 
 **Jitendra Singh**
-🚀 UP42 Senior Cloud Engineer Challenge
-
 * 🔗 [GitHub Repository](https://github.com/jitendrabhalothia/s3www-minio-deployment)
 
 ---
